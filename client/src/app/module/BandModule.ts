@@ -15,6 +15,11 @@ const BandModule = {
     editBand: async (foromData: any) => {
         const response = await api('editBand', 'PUT', foromData)
         return response as Response
+    },
+
+    showBand: async (page: number) => {
+        const response = await api('showBand', 'POST', { page })
+        return response as Response
     }
 
 }

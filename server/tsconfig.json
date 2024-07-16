@@ -11,5 +11,20 @@
     "include": ["./**/*.ts"],
     "exclude": ["node_modules"]
 }
-  
-  
+
+// seed用のtsconfig.json
+// {
+//   "compilerOptions": {
+//     "target": "ESNext",
+//     "module": "ESNext",
+//     "moduleResolution": "node",
+//     "strict": true,
+//     "esModuleInterop": true,
+//     "skipLibCheck": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "allowImportingTsExtensions": true,
+//     "noEmit": true
+//   },
+//   "include": ["**/*.ts"],
+//   "exclude": ["node_modules"]
+// }

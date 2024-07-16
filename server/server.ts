@@ -16,13 +16,14 @@ import { createBandService, uploadFields, upload } from './service/bandService/c
 import getBandService from './service/bandService/getBandService'
 import { connectSessionService, redisClient } from './service/connectSessionService/ConnectSessionService'
 import editBandService from './service/bandService/editBandService'
+import showBandService from './service/bandService/showBandService'
 //QRService
 import createQRCodeService from './service/qrService/createQRCodeService'
+import joinLiveService from './service/qrService/joinLiveService'
 
 import Band from './models/Band'
 import User from './models/User'
 import Live from './models/Live'
-import joinLiveService from './service/qrService/joinLiveService'
 
 const app = express()
 const PORT = process.env.PORT || 8080
@@ -71,6 +72,12 @@ app.post('/api/createBand', upload.fields(uploadFields), async (req: Request, re
 // バンド情報を取得する
 app.post('/api/getBand', async (req: Request, res: Response) => {
   const response = await getBandService(req, res)
+  return response
+})
+
+//バンド情報をページネーションで取得する
+app.post('/api/showBand', async (req: Request, res: Response) => {
+  const response = await showBandService(req, res)
   return response
 })
 
