@@ -13,6 +13,7 @@ import getUserService from './service/userServices/getUserService'
 import loginService from './service/userServices/loginService'
 //bandServices
 import { createBandService, uploadFields, upload } from './service/bandService/createBandService'
+import getBandByEmailService from './service/bandService/getBandByEmailService'
 import getBandService from './service/bandService/getBandService'
 import { connectSessionService, redisClient } from './service/connectSessionService/ConnectSessionService'
 import editBandService from './service/bandService/editBandService'
@@ -24,6 +25,7 @@ import joinLiveService from './service/qrService/joinLiveService'
 import Band from './models/Band'
 import User from './models/User'
 import Live from './models/Live'
+
 
 const app = express()
 const PORT = process.env.PORT || 8080
@@ -71,7 +73,13 @@ app.post('/api/createBand', upload.fields(uploadFields), async (req: Request, re
 
 // バンド情報を取得する
 app.post('/api/getBand', async (req: Request, res: Response) => {
-  const response = await getBandService(req, res)
+  const response = await getBandByEmailService(req, res)
+  return response
+})
+
+// バンド情報をidで取得する
+app.post('/api/getBandById', async (req: Request, res: Response) => {
+  const response = await getBandService(req, res, redisClient)
   return response
 })
 

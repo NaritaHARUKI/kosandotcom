@@ -15,7 +15,7 @@ const HomePage = () => {
         <StyledHeader>
           <img src="/top_logo.webp" alt="logo" style={{ width: '130px', height: '130px' }}/>
           <div style={{display:"flex", alignItems:"center"}}>
-            <div style={{margin: "0 10px"}}>探す</div>
+            <StyledLink onClick={() => router.push('/showBand')}>探す</StyledLink>
             {userData ? (
               <StyledButton onClick={() => router.push('/profile')}>プロフィール</StyledButton>
             ) : (
@@ -67,10 +67,13 @@ const StyledHeader = styled.div`
   align-items: center;
   padding: 0 20px;
   height: 60px;
+  margin: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 100;
   background-color: white;
+  overflow: hidden;
 `
+
 const StyledBackground = styled.div`
 position: relative;
   background-color: #fff;
@@ -230,4 +233,10 @@ const StyledButton = styled.button`
     cursor: pointer;
   }
 `
+const StyledLink = styled.div`
+  margin: 0 10px;
 
+  &:hover {
+    cursor: pointer;
+  }
+`

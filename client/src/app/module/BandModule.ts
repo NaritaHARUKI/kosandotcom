@@ -20,6 +20,11 @@ const BandModule = {
     showBand: async (page: number) => {
         const response = await api('showBand', 'POST', { page })
         return response as Response
+    },
+
+    showBandDetail: async(id: string) => {
+        const response = await api('getBandById', 'POST', { id })
+        return response as Response
     }
 
 }
