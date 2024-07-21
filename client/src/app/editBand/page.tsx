@@ -9,7 +9,7 @@ import TextareaController from '../componets/TextareaController'
 import { useRouter } from 'next/navigation'
 import getUser from '../componets/hooks/getUser'
 import BandModule from '../module/BandModule'
-import UserModules from '../module/UserModule'
+import Trash from '../../../public/Trash.png'
 
 const EditBandPage = () => {
   const { control, handleSubmit, reset } = useForm({})
@@ -19,35 +19,19 @@ const EditBandPage = () => {
   const [videos, setVideos] = useState<{url: string, hash: string}[]>()
   const [sendImages, setSendImages] = useState<File[]>()
   const [links, setLinks] = useState<{ name: string; url: string }[]>()
-  const [defaultValues, setDefaultValues] = useState({
-    name: "",
-    location: "",
-    description: "",
-    links: "",
-    images: "",
-    videos: ""
-  })
+  const [deletedImages, setDeletedImages] = useState<{url: string, hash: string}[]>([])
+  const [deletedVideos, setDeletedVideos] = useState<{url: string, hash: string}[]>([])
 
   useEffect(() => {
     // バンドの既存データを取得してフォームにセットする
     const fetchBandData = async () => {
       try {
         const userData = getUser()
-        console.log('fetchBandData', userData)
         if (!userData) return
         const response = await BandModule.getBand(userData.email)
-        console.log(response,userData.email)
-        // const response = await fetch(`http://localhost:8080/api/getBand`, { 
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({ email: userData.email }),
-        // })
         const data = await response.json()
-        console.log(data)
-        setBandId(data._id)
         setLinks(data.links)
+        setBandId(data._id)
         setImages(data.images)
         setVideos(data.videos)
         reset({
@@ -55,19 +39,17 @@ const EditBandPage = () => {
             location: data.location,
             description: data.description,  
         })
-        
+        console.log(data)
       } catch (error) {
         console.error(error)
       }
     }
-
     fetchBandData()
   }, [])
 
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files)
-      console.log(selectedFiles)
       setSendImages((prevFiles = []) => {
         const newFiles = [...prevFiles, ...selectedFiles]
         if (newFiles.length > 10) {
@@ -78,20 +60,6 @@ const EditBandPage = () => {
       })
     }
   }
-
-//   const handleVideosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files) {
-//       const selectedFiles = Array.from(e.target.files)
-//       setVideos(prevFiles => {
-//         const newFiles = [...prevFiles, ...selectedFiles]
-//         if (newFiles.length > 3) {
-//           alert('動画の数が多すぎます。最大3個までアップロードできます。')
-//           return prevFiles
-//         }
-//         return newFiles
-//       })
-//     }
-//   }
 
   const handleLinkChange = (index: number, field: 'name' | 'url', value: string) => {
     const newLinks = Array.isArray(links) ? [...links] : []
@@ -109,6 +77,10 @@ const EditBandPage = () => {
 
   const removeLinkForm = () => {
     if (Array.isArray(links) && links.length > 0) {
+      if(links.length === 1){
+        setLinks([{ name: '', url: '' }])
+        return
+      }
       setLinks(links.slice(0, links.length - 1))
     }
   }
@@ -121,6 +93,8 @@ const EditBandPage = () => {
     formData.append('location', data.location)
     formData.append('description', data.description)
     formData.append('links', JSON.stringify(links))
+    formData.append('deletedImages', JSON.stringify(deletedImages))
+    formData.append('deletedVideos', JSON.stringify(deletedVideos))
     if(Array.isArray(sendImages)){
         sendImages.forEach((image, index) => {
             formData.append(`images[${index}]`, image)
@@ -139,13 +113,24 @@ const EditBandPage = () => {
       })
       if (response.ok) {
         router.push('/')
-      } else {
-        alert('バンドの編集に失敗しました')
+        return
       }
+      alert('バンドの編集に失敗しました')
     } catch (error) {
-      console.error(error)
       alert('バンドの編集に失敗しました')
     }
+  }
+
+  const handleDeleteImage = (image: {url: string, hash: string}) => {
+    if (confirm('本当に画像を削除してよろしいですか？')) {
+      deleteImage(image.url)
+      setDeletedImages([...deletedImages, image])
+    }
+  }
+
+  const deleteImage = (url: string) => {
+    const newImages = images?.filter((image) => image.url !== url)
+    setImages(newImages)
   }
 
   return (
@@ -158,7 +143,6 @@ const EditBandPage = () => {
           placeholder="バンド名"
           control={control}
           rules={{ required: 'バンド名は必須です' }}
-          defaultValue={defaultValues.name}
         />
         <SelectBoxController
           name="location"
@@ -198,11 +182,24 @@ const EditBandPage = () => {
 
         <label>画像 (最大10個)</label>
         <Input type="file" multiple accept="image/*" onChange={handleImagesChange}/>
-        <ul>
+        <StyledFileWrapper>
           {images && images.map((image, index) => (
-            <li key={index}>{image.url}</li>
+              <StyledFileList key={index}><img src={image.url} alt=''/>
+                <StyledDeleteButton onClick={() => handleDeleteImage(image)}>
+                  <StyledTrsah src={Trash.src} alt=''/>
+                </StyledDeleteButton>
+              </StyledFileList>
           ))}
-        </ul>
+          {sendImages && sendImages.map((image, index) => (
+              <StyledFileList key={index}><img src={URL.createObjectURL(image)} alt=''/>
+                <StyledDeleteButton onClick={() => {
+                  setSendImages(sendImages.filter((_, i) => i !== index))
+                }}>
+                  <StyledTrsah src={Trash.src} alt=''/>
+                </StyledDeleteButton>
+              </StyledFileList>
+          ))}
+        </StyledFileWrapper>
 
         <label>動画 (最大3個)</label>
         <Input type="file" multiple accept="video/*" />
@@ -274,6 +271,32 @@ const StyledLinks = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
+`
+const StyledFileList = styled.div`
+  width: 200px;
+  height: 200px;
+  margin: 10px;
+  background-color: #333;
+  position: relative;
+`
+const StyledFileWrapper = styled.div`
+  display: flex;
+`
+const StyledDeleteButton = styled(Button)`
+  margin-left: 8px;
+  background-color: #EF5A6F;
+  color: white;
+  border: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  &:hover {
+    color: white;
+  }
+`
+const StyledTrsah = styled.img`
+  width: 20px;
+  height: 20px;
 `
 
 const StyledLinkForm: React.FC<{ children: React.ReactNode }> = ({ children }) => {

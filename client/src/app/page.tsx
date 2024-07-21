@@ -16,6 +16,9 @@ const HomePage = () => {
           <img src="/top_logo.webp" alt="logo" style={{ width: '130px', height: '130px' }}/>
           <div style={{display:"flex", alignItems:"center"}}>
             <StyledLink onClick={() => router.push('/showBand')}>探す</StyledLink>
+            {userData?.isAdministrator && (
+              <StyledLink onClick={() => router.push('/editBand')}>編集する</StyledLink>
+            )}
             {userData ? (
               <StyledButton onClick={() => router.push('/profile')}>プロフィール</StyledButton>
             ) : (
